@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1095033962890",
+    "project_id": "usapho-dashboard",
+    "storage_bucket": "usapho-dashboard.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1095033962890:android:265bb30ef260a2f0f74873",
+        "android_client_info": {
+          "package_name": "com.example.usapho_dashboard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaWCOEo_ZFB87m-0sSOA9HyyKhrrSsGbA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
