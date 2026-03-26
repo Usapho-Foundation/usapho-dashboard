@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow create: if isSignedIn()
+        && request.auth.uid == userId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.role in [
+          'admin',
+          'Admin',
+          'board',
+          'Board',
+          'Board Member',
+          'staff',
+          'Staff'
+        ];
+      allow update: if isSignedIn()
+        && request.auth.uid == userId
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.role == resource.data.role;
+      allow delete: if false;
+    }
+
+    match /funding_opportunities/{document=**} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /partnerships/{document=**} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /programs/{document=**} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /campaigns/{document=**} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /financials/{document=**} {
+      allow read, write: if isSignedIn();
+    }
+  }
+}

@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+
 import 'firebase_options.dart';
-import 'screens/corporate_funding_screen.dart';
+import 'screens/auth_gate.dart';
+import 'ui/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,8 +20,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Usapho Dashboard',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const CorporateFundingScreen(),
+      debugShowCheckedModeBanner: false,
+      theme: buildAppTheme(),
+      home: const AuthGate(),
     );
   }
 }

@@ -1,1 +1,43 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"usapho-dashboard","appId":"1:1095033962890:android:265bb30ef260a2f0f74873","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"usapho-dashboard","configurations":{"android":"1:1095033962890:android:265bb30ef260a2f0f74873","ios":"1:1095033962890:ios:353706c696ff207ff74873","macos":"1:1095033962890:ios:353706c696ff207ff74873","web":"1:1095033962890:web:04c7d6bd9bb5f3f6f74873","windows":"1:1095033962890:web:5ebb8841c63a6f26f74873"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "usapho-dashboard",
+          "appId": "1:1095033962890:android:265bb30ef260a2f0f74873",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "usapho-dashboard",
+          "configurations": {
+            "android": "1:1095033962890:android:265bb30ef260a2f0f74873",
+            "ios": "1:1095033962890:ios:353706c696ff207ff74873",
+            "macos": "1:1095033962890:ios:353706c696ff207ff74873",
+            "web": "1:1095033962890:web:04c7d6bd9bb5f3f6f74873",
+            "windows": "1:1095033962890:web:5ebb8841c63a6f26f74873"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
