@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthFlowException implements Exception {
   const AuthFlowException(this.message);
@@ -20,6 +21,22 @@ class AuthService {
   Future<Map<String, dynamic>?> getUserProfile(String uid) async {
     final snapshot = await _firestore.collection('users').doc(uid).get();
     return snapshot.data();
+  }
+
+  Future<Map<String, dynamic>?> waitForUserProfile(
+    String uid, {
+    int attempts = 6,
+    Duration delay = const Duration(milliseconds: 400),
+  }) async {
+    for (int i = 0; i < attempts; i++) {
+      final profile = await getUserProfile(uid);
+      if (profile != null &&
+          canonicalRole(profile['role'] as String?) != null) {
+        return profile;
+      }
+      await Future<void>.delayed(delay);
+    }
+    return null;
   }
 
   String? canonicalRole(String? role) {
@@ -43,31 +60,7 @@ class AuthService {
   }
 
   Future<void> signIn({required String email, required String password}) async {
-    final credential = await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-
-    final uid = credential.user?.uid;
-    if (uid == null) {
-      throw const AuthFlowException('Unable to sign in right now.');
-    }
-
-    final profile = await _firestore.collection('users').doc(uid).get();
-    if (!profile.exists) {
-      await _auth.signOut();
-      throw const AuthFlowException(
-        'Your account exists, but your profile is missing. Please contact support.',
-      );
-    }
-
-    final role = canonicalRole(profile.data()?['role'] as String?);
-    if (role == null) {
-      await _auth.signOut();
-      throw const AuthFlowException(
-        'Your account role is not valid yet. Please contact an administrator.',
-      );
-    }
+    await _auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
   Future<void> signUp({
@@ -88,13 +81,26 @@ class AuthService {
 
     await user.updateDisplayName(fullName);
 
-    await _firestore.collection('users').doc(user.uid).set({
-      'uid': user.uid,
-      'fullName': fullName,
-      'email': email,
-      'role': role,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+    final canonical = canonicalRole(role);
+    if (canonical == null) {
+      throw const AuthFlowException('Please choose a valid role.');
+    }
+
+    try {
+      await _firestore.collection('users').doc(user.uid).set({
+        'uid': user.uid,
+        'fullName': fullName,
+        'email': email,
+        'role': canonical,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    } catch (error) {
+      if (kDebugMode) {
+        debugPrint('Sign-up profile save failed: $error');
+      }
+      await user.delete();
+      rethrow;
+    }
   }
 
   Future<void> sendPasswordResetEmail({required String email}) {
