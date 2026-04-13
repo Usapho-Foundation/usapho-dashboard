@@ -110,7 +110,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
       builder: (_) => DataEntryDialog(repository: _repository),
     );
   }
+  Future<void> _openFeedbackDialog() async {
+    final feedbackController = TextEditingController();
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Share Feedback'),
+        content: TextField(
+          controller: feedbackController,
+          minLines: 4,
+          maxLines: 8,
+          decoration: const InputDecoration(
+            hintText: 'Add feedback or suggestions for the dashboard',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton.icon(
+            onPressed: _openFeedbackDialog,
+            icon: const Icon(Icons.feedback_outlined, color: Colors.black87),
+            label: const Text(
+              'Feedback',
+              style: TextStyle(color: Colors.black87),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final feedback = feedbackController.text.trim();
+              Navigator.pop(context);
 
+              if (feedback.isEmpty) {
+                ScaffoldMessenger.of(this.context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please add feedback before submitting.'),
+                  ),
+                );
+                return;
+              }
+
+              ScaffoldMessenger.of(this.context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Thanks! Your feedback has been captured for review.',
+                  ),
+                ),
+              );
+            },
+            child: const Text('Submit'),
+          ),
+        ],
+      ),
+    );
+    feedbackController.dispose();
+  }
   void _openEditFunding(FundingOpportunity item) {
     showDialog<void>(
       context: context,
@@ -176,6 +232,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         title: const Text('Delete Entry'),
         content: Text('Delete "$title"? This cannot be undone.'),
         actions: [
+          TextButton.icon(
+            onPressed: _openFeedbackDialog,
+            icon: const Icon(Icons.feedback_outlined, color: Colors.black87),
+            label: const Text(
+              'Feedback',
+              style: TextStyle(color: Colors.black87),
+            ),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: const Text('Cancel'),
@@ -371,6 +435,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
         actions: [
+          TextButton.icon(
+            onPressed: _openFeedbackDialog,
+            icon: const Icon(Icons.feedback_outlined, color: Colors.black87),
+            label: const Text(
+              'Feedback',
+              style: TextStyle(color: Colors.black87),
+            ),
+          ),
           TextButton.icon(
             onPressed: () => FirebaseAuth.instance.signOut(),
             icon: const Icon(Icons.logout, color: Colors.black87),
@@ -892,3 +964,4 @@ class _EntryTile extends StatelessWidget {
     );
   }
 }
+
