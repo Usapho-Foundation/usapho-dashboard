@@ -94,6 +94,7 @@ This app expects:
 - `campaigns`
 - `financials`
 - `users`
+- `usapho_feedback`
 
 ## Deploy To Free Firebase Link
 
@@ -128,6 +129,7 @@ After deploy, Firebase will print the live URL.
 - The login page is in the app and uses Firebase Authentication
 - Firestore rules are in [firestore.rules](/C:/FlutterProjects/usapho_dashboard/firestore.rules)
 - Only signed-in users can access the dashboard data in the current rules setup
+- Feedback submitted from the dashboard is stored in `usapho_feedback`
 
 ## Files Added For Hosting And Security
 

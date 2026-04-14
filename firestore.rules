@@ -46,5 +46,11 @@ service cloud.firestore {
     match /financials/{document=**} {
       allow read, write: if isSignedIn();
     }
+
+    match /usapho_feedback/{document=**} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
   }
 }

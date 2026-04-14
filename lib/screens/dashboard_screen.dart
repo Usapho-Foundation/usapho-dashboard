@@ -11,6 +11,7 @@ import '../models/funding_opportunity.dart';
 import '../models/partnership.dart';
 import '../models/program_record.dart';
 import '../services/dashboard_repository.dart';
+import '../services/feedback_service.dart';
 import '../widgets/chart_card.dart';
 import '../widgets/data_entry_dialog.dart';
 import '../widgets/filter_bar.dart';
@@ -25,6 +26,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final DashboardRepository _repository = DashboardRepository();
+  final FeedbackService _feedbackService = FeedbackService();
   final List<StreamSubscription<dynamic>> _subscriptions = [];
 
   DashboardFilter _filter = const DashboardFilter();
@@ -110,6 +112,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       builder: (_) => DataEntryDialog(repository: _repository),
     );
   }
+
   Future<void> _openFeedbackDialog() async {
     final feedbackController = TextEditingController();
     await showDialog<void>(
@@ -139,12 +142,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: () {
+            onPressed: () async {
               final feedback = feedbackController.text.trim();
-              Navigator.pop(context);
-
               if (feedback.isEmpty) {
-                ScaffoldMessenger.of(this.context).showSnackBar(
+                ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Please add feedback before submitting.'),
                   ),
@@ -152,13 +153,66 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 return;
               }
 
-              ScaffoldMessenger.of(this.context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Thanks! Your feedback has been captured for review.',
+              final currentUser = FirebaseAuth.instance.currentUser;
+              if (currentUser == null) {
+                debugPrint(
+                  'Feedback submission failed: no authenticated user.',
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Unable to submit feedback. Please sign in and try again.',
+                    ),
                   ),
-                ),
-              );
+                );
+                return;
+              }
+
+              final navigator = Navigator.of(context);
+              final messenger = ScaffoldMessenger.of(context);
+
+              try {
+                await _feedbackService.saveFeedback(
+                  userId: currentUser.uid,
+                  feedbackText: feedback,
+                );
+                if (!mounted) {
+                  return;
+                }
+
+                navigator.pop();
+                messenger.showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Thanks! Your feedback has been captured for review.',
+                    ),
+                  ),
+                );
+              } on FirebaseException catch (error) {
+                debugPrint('Feedback submission failed: $error');
+                if (!mounted) {
+                  return;
+                }
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Unable to submit feedback right now. ${error.message ?? 'Please try again later.'}',
+                    ),
+                  ),
+                );
+              } catch (error) {
+                debugPrint('Feedback submission failed: $error');
+                if (!mounted) {
+                  return;
+                }
+                messenger.showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Unable to submit feedback right now. Please try again later.',
+                    ),
+                  ),
+                );
+              }
             },
             child: const Text('Submit'),
           ),
@@ -167,6 +221,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
     feedbackController.dispose();
   }
+
   void _openEditFunding(FundingOpportunity item) {
     showDialog<void>(
       context: context,
@@ -964,4 +1019,3 @@ class _EntryTile extends StatelessWidget {
     );
   }
 }
-
