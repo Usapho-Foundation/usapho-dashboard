@@ -734,6 +734,105 @@ class DashboardCalculations {
     return alerts.take(6).toList();
   }
 
+  static Map<String, dynamic> totalRestrictedFunding(
+    List<FundingOpportunity> funding,
+  ) {
+    final restricted = funding.where((item) => item.type == 'restricted');
+    final targetRestricted = restricted.fold<double>(
+      0,
+      (sum, item) => sum + item.annually,
+    );
+    final receivedRestricted = restricted.fold<double>(
+      0,
+      (sum, item) => sum + item.amountReceivedToDate,
+    );
+    return {
+      'target': targetRestricted,
+      'received': receivedRestricted,
+    };
+  }
+
+  static Map<String, dynamic> totalUnrestrictedFunding(
+    List<FundingOpportunity> funding,
+  ) {
+    final unrestricted = funding.where((item) => item.type == 'unrestricted');
+    final targetUnrestricted = unrestricted.fold<double>(
+      0,
+      (sum, item) => sum + item.target,
+    );
+    final receivedUnrestricted = unrestricted.fold<double>(
+      0,
+      (sum, item) => sum + item.amountReceivedToDate,
+    );
+    return {
+      'target': targetUnrestricted,
+      'received': receivedUnrestricted,
+    };
+  }
+
+  static Map<String, int> proposalStatusCounts(
+    List<FundingOpportunity> funding,
+  ) {
+    final proposals = funding.where((item) => item.type == 'proposal');
+    final statusCounts = {
+      'pending': 0,
+      'in_progress': 0,
+      'successful': 0,
+      'no_response': 0,
+      'no_deal': 0,
+    };
+
+    for (final proposal in proposals) {
+      final status = proposal.status.toLowerCase();
+      if (statusCounts.containsKey(status)) {
+        statusCounts[status] = statusCounts[status]! + 1;
+      }
+    }
+
+    return statusCounts;
+  }
+
+  static Map<String, dynamic> totalOtherIncome(
+    List<FundingOpportunity> funding,
+  ) {
+    final incomeActivities =
+        funding.where((item) => item.type == 'income_activity');
+    final targetOtherIncome = incomeActivities.fold<double>(
+      0,
+      (sum, item) => sum + item.target,
+    );
+    final actualOtherIncome = incomeActivities.fold<double>(
+      0,
+      (sum, item) => sum + item.actual,
+    );
+    return {
+      'target': targetOtherIncome,
+      'actual': actualOtherIncome,
+    };
+  }
+
+  static Map<String, dynamic> incomeForecastSummary(
+    List<FundingOpportunity> funding,
+  ) {
+    final forecasts = funding.where((item) => item.type == 'forecast');
+    final forecastedTotal = forecasts.fold<double>(
+      0,
+      (sum, item) => sum + item.forecastedIncome,
+    );
+    final actualTotal = forecasts.fold<double>(
+      0,
+      (sum, item) => sum + item.actual,
+    );
+    final percentageAchieved =
+        forecastedTotal == 0 ? 0.0 : (actualTotal / forecastedTotal) * 100;
+
+    return {
+      'forecastedTotal': forecastedTotal,
+      'actualTotal': actualTotal,
+      'percentageAchieved': percentageAchieved,
+    };
+  }
+
   static double _engagementScore(String value) {
     switch (value) {
       case 'high':

@@ -121,7 +121,32 @@ class _FundingFormState extends State<_FundingForm> {
   late final TextEditingController _ownerController;
   late final TextEditingController _notesController;
   late final TextEditingController _closeDateController;
+  late final TextEditingController _funderNameController;
+  late final TextEditingController _monthlyController;
+  late final TextEditingController _quarterlyController;
+  late final TextEditingController _annuallyController;
+  late final TextEditingController _fundingPeriodController;
+  late final TextEditingController _cohortTargetController;
+  late final TextEditingController _cohortActualController;
+  late final TextEditingController _amountAppliedForController;
+  late final TextEditingController _amountReceivedToDateController;
+  late final TextEditingController _targetController;
+  late final TextEditingController _actualController;
+  late final TextEditingController _dateSubmittedController;
+  late final TextEditingController _stakeholderContactController;
+  late final TextEditingController _personResponsibleController;
+  late final TextEditingController _commentsController;
+  late final TextEditingController _updateController;
+  late final TextEditingController _forecastedIncomeController;
   late String _status;
+  late String _type;
+  static const List<String> _proposalStatuses = [
+    'pending',
+    'in_progress',
+    'successful',
+    'no_response',
+    'no_deal',
+  ];
 
   @override
   void initState() {
@@ -148,7 +173,53 @@ class _FundingFormState extends State<_FundingForm> {
     _closeDateController = TextEditingController(
       text: _dateText(existing?.expectedCloseDate),
     );
-    _status = existing?.status ?? 'pipeline';
+    _funderNameController = TextEditingController(text: existing?.funderName ?? '');
+    _monthlyController = TextEditingController(
+      text: _numberText(existing?.monthly),
+    );
+    _quarterlyController = TextEditingController(
+      text: _numberText(existing?.quarterly),
+    );
+    _annuallyController = TextEditingController(
+      text: _numberText(existing?.annually),
+    );
+    _fundingPeriodController = TextEditingController(
+      text: existing?.fundingPeriod ?? '',
+    );
+    _cohortTargetController = TextEditingController(
+      text: existing?.cohortTarget.toString(),
+    );
+    _cohortActualController = TextEditingController(
+      text: existing?.cohortActual.toString(),
+    );
+    _amountAppliedForController = TextEditingController(
+      text: _numberText(existing?.amountAppliedFor),
+    );
+    _amountReceivedToDateController = TextEditingController(
+      text: _numberText(existing?.amountReceivedToDate),
+    );
+    _targetController = TextEditingController(
+      text: _numberText(existing?.target),
+    );
+    _actualController = TextEditingController(
+      text: _numberText(existing?.actual),
+    );
+    _dateSubmittedController = TextEditingController(
+      text: _dateText(existing?.dateSubmitted),
+    );
+    _stakeholderContactController = TextEditingController(
+      text: existing?.stakeholderContact ?? '',
+    );
+    _personResponsibleController = TextEditingController(
+      text: existing?.personResponsible ?? '',
+    );
+    _commentsController = TextEditingController(text: existing?.comments ?? '');
+    _updateController = TextEditingController(text: existing?.update ?? '');
+    _forecastedIncomeController = TextEditingController(
+      text: _numberText(existing?.forecastedIncome),
+    );
+    _type = existing?.type ?? 'restricted';
+    _status = existing?.status ?? (_type == 'proposal' ? 'pending' : 'pipeline');
   }
 
   @override
@@ -162,6 +233,23 @@ class _FundingFormState extends State<_FundingForm> {
     _ownerController.dispose();
     _notesController.dispose();
     _closeDateController.dispose();
+    _funderNameController.dispose();
+    _monthlyController.dispose();
+    _quarterlyController.dispose();
+    _annuallyController.dispose();
+    _fundingPeriodController.dispose();
+    _cohortTargetController.dispose();
+    _cohortActualController.dispose();
+    _amountAppliedForController.dispose();
+    _amountReceivedToDateController.dispose();
+    _targetController.dispose();
+    _actualController.dispose();
+    _dateSubmittedController.dispose();
+    _stakeholderContactController.dispose();
+    _personResponsibleController.dispose();
+    _commentsController.dispose();
+    _updateController.dispose();
+    _forecastedIncomeController.dispose();
     super.dispose();
   }
 
@@ -183,6 +271,24 @@ class _FundingFormState extends State<_FundingForm> {
       owner: _ownerController.text.trim(),
       notes: _notesController.text.trim(),
       createdAt: widget.existing?.createdAt ?? DateTime.now(),
+      type: _type,
+      funderName: _funderNameController.text.trim(),
+      monthly: double.tryParse(_monthlyController.text) ?? 0,
+      quarterly: double.tryParse(_quarterlyController.text) ?? 0,
+      annually: double.tryParse(_annuallyController.text) ?? 0,
+      fundingPeriod: _fundingPeriodController.text.trim(),
+      cohortTarget: int.tryParse(_cohortTargetController.text) ?? 0,
+      cohortActual: int.tryParse(_cohortActualController.text) ?? 0,
+      amountAppliedFor: double.tryParse(_amountAppliedForController.text) ?? 0,
+      amountReceivedToDate: double.tryParse(_amountReceivedToDateController.text) ?? 0,
+      target: double.tryParse(_targetController.text) ?? 0,
+      actual: double.tryParse(_actualController.text) ?? 0,
+      dateSubmitted: _parseDate(_dateSubmittedController.text),
+      stakeholderContact: _stakeholderContactController.text.trim(),
+      personResponsible: _personResponsibleController.text.trim(),
+      comments: _commentsController.text.trim(),
+      update: _updateController.text.trim(),
+      forecastedIncome: double.tryParse(_forecastedIncomeController.text) ?? 0,
     );
 
     if (widget.existing == null) {
@@ -195,6 +301,179 @@ class _FundingFormState extends State<_FundingForm> {
     Navigator.pop(context);
   }
 
+  List<Widget> _buildTypeFields() {
+    switch (_type) {
+      case 'restricted':
+        return [
+          _requiredField(
+            _funderNameController,
+            'Funder Name',
+            info: 'The name of the restricted funding source.',
+          ),
+          _numberField(
+            _annuallyController,
+            'Annually',
+            info: 'The annual award amount for this restricted funding.',
+          ),
+          _numberField(
+            _quarterlyController,
+            'Quarterly',
+            info: 'The quarterly instalment amount if applicable.',
+          ),
+          _requiredField(
+            _fundingPeriodController,
+            'Funding Period',
+            info: 'The coverage period for this restricted funding.',
+          ),
+          _numberField(
+            _cohortTargetController,
+            'Cohort Target',
+            wholeNumbers: true,
+            info: 'The expected cohort target for the funding period.',
+          ),
+          _numberField(
+            _cohortActualController,
+            'Cohort Actual',
+            wholeNumbers: true,
+            info: 'The actual cohort count achieved this period.',
+          ),
+          _textAreaField(
+            _commentsController,
+            'Comments',
+            info: 'Any notes about the restricted funding entry.',
+          ),
+        ];
+      case 'unrestricted':
+        return [
+          _requiredField(
+            _funderNameController,
+            'Donor Name',
+            info: 'The name of the unrestricted funding donor.',
+          ),
+          _numberField(
+            _monthlyController,
+            'Monthly Amount',
+            info: 'The monthly contribution amount from the donor.',
+          ),
+          _numberField(
+            _amountAppliedForController,
+            'Amount Applied For',
+            info: 'The total amount applied for from this donor.',
+          ),
+          _numberField(
+            _amountReceivedToDateController,
+            'Amount Received to Date',
+            info: 'The amount received so far from this donor.',
+          ),
+          _numberField(
+            _targetController,
+            'Target',
+            info: 'The fundraising target associated with this donor.',
+          ),
+          _textAreaField(
+            _commentsController,
+            'Comments',
+            info: 'Any notes related to this unrestricted funding donor.',
+          ),
+        ];
+      case 'proposal':
+        return [
+          _requiredField(
+            _funderNameController,
+            'Organisation Name',
+            info: 'The organisation submitting the proposal.',
+          ),
+          _dateField(
+            _dateSubmittedController,
+            'Date Submitted',
+            info: 'The date the proposal was submitted.',
+          ),
+          _requiredField(
+            _stakeholderContactController,
+            'Stakeholder Contact',
+            info: 'The main contact person for the proposal.',
+          ),
+          _numberField(
+            _amountAppliedForController,
+            'Amount Applied For',
+            info: 'The amount requested in the proposal.',
+          ),
+          _numberField(
+            _amountReceivedToDateController,
+            'Amount Received to Date',
+            info: 'The amount received against the proposal so far.',
+          ),
+          _requiredField(
+            _personResponsibleController,
+            'Person Responsible',
+            info: 'The team member responsible for managing this proposal.',
+          ),
+          _dropdownField<String>(
+            label: 'Status',
+            info: 'The current proposal status.',
+            value: _status,
+            items: const [
+              DropdownMenuItem(value: 'pending', child: Text('Pending')),
+              DropdownMenuItem(value: 'in_progress', child: Text('In Progress')),
+              DropdownMenuItem(value: 'successful', child: Text('Successful')),
+              DropdownMenuItem(value: 'no_response', child: Text('No Response')),
+              DropdownMenuItem(value: 'no_deal', child: Text('No Deal')),
+            ],
+            onChanged: (value) => setState(() => _status = value ?? 'pending'),
+          ),
+          _textAreaField(
+            _updateController,
+            'Update/Notes',
+            info: 'Recent progress, outcomes, or next steps for this proposal.',
+          ),
+        ];
+      case 'income_activity':
+        return [
+          _requiredField(
+            _funderNameController,
+            'Activity Name',
+            info: 'The name of the income-generating activity.',
+          ),
+          _numberField(
+            _targetController,
+            'Target',
+            info: 'The target income amount for the activity.',
+          ),
+          _numberField(
+            _actualController,
+            'Actual',
+            info: 'The amount actually received from the activity.',
+          ),
+        ];
+      case 'forecast':
+        return [
+          _requiredField(
+            _funderNameController,
+            'Source Name',
+            info: 'The income source used for the forecast.',
+          ),
+          _numberField(
+            _forecastedIncomeController,
+            'Forecasted Income',
+            info: 'The forecasted income amount for this source.',
+          ),
+          _numberField(
+            _actualController,
+            'Actual to Date',
+            info: 'Actual income received against the forecast so far.',
+          ),
+        ];
+      default:
+        return [
+          _requiredField(
+            _funderNameController,
+            'Funder Name',
+            info: 'The name of the funding source.',
+          ),
+        ];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return _FormScaffold(
@@ -205,71 +484,103 @@ class _FundingFormState extends State<_FundingForm> {
         key: _formKey,
         child: _FormGrid(
           children: [
-            _requiredField(
-              _entityController,
-              'Entity Name',
-              info:
-                  'The organization or donor you are engaging for this opportunity.',
-            ),
-            _requiredField(
-              _opportunityController,
-              'Opportunity Name',
-              info:
-                  'A short label for the grant, proposal, or funding opportunity.',
-            ),
-            _numberField(
-              _appliedController,
-              'Amount Applied',
-              info: 'The value requested from the donor or funder.',
-            ),
-            _numberField(
-              _approvedController,
-              'Amount Approved',
-              info: 'The amount formally approved so far, if any.',
-            ),
-            _numberField(
-              _receivedController,
-              'Amount Received',
-              info:
-                  'The money that has actually been received into the account.',
-            ),
             _dropdownField<String>(
-              label: 'Status',
-              info:
-                  'Where this opportunity currently sits in the fundraising process.',
-              value: _status,
+              label: 'Funding Type',
+              info: 'Select the funding report section this record belongs to.',
+              value: _type,
               items: const [
-                DropdownMenuItem(value: 'pipeline', child: Text('Pipeline')),
-                DropdownMenuItem(value: 'submitted', child: Text('Submitted')),
-                DropdownMenuItem(value: 'approved', child: Text('Approved')),
-                DropdownMenuItem(value: 'received', child: Text('Received')),
-                DropdownMenuItem(value: 'declined', child: Text('Declined')),
+                DropdownMenuItem(value: 'restricted', child: Text('Restricted Funding')),
+                DropdownMenuItem(value: 'unrestricted', child: Text('Unrestricted Funding')),
+                DropdownMenuItem(value: 'proposal', child: Text('Proposal Submission')),
+                DropdownMenuItem(value: 'income_activity', child: Text('Other Income Activity')),
+                DropdownMenuItem(value: 'forecast', child: Text('Income Forecast')),
               ],
-              onChanged: (value) =>
-                  setState(() => _status = value ?? 'pipeline'),
+              onChanged: (value) => setState(() {
+                _type = value ?? 'restricted';
+                if (_type == 'proposal' && !_proposalStatuses.contains(_status)) {
+                  _status = 'pending';
+                }
+              }),
             ),
-            _numberField(
-              _probabilityController,
-              'Probability (%)',
-              info:
-                  'Your best estimate of how likely the opportunity is to close successfully.',
-            ),
-            _requiredField(
-              _ownerController,
-              'Owner',
-              info: 'The person responsible for managing this opportunity.',
-            ),
-            _dateField(
-              _closeDateController,
-              'Expected Close Date',
-              info:
-                  'The date you expect a decision or payment milestone to happen.',
-            ),
-            _textAreaField(
-              _notesController,
-              'Notes',
-              info:
-                  'Any context, history, or next-step notes for the opportunity.',
+            ..._buildTypeFields(),
+            ExpansionTile(
+              title: const Text(
+                'Advanced / Legacy Fields',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              childrenPadding: const EdgeInsets.symmetric(horizontal: 8),
+              children: [
+                _FormGrid(
+                  children: [
+                    _requiredField(
+                      _entityController,
+                      'Entity Name',
+                      info:
+                          'The organization or donor you are engaging for this opportunity.',
+                    ),
+                    _requiredField(
+                      _opportunityController,
+                      'Opportunity Name',
+                      info:
+                          'A short label for the grant, proposal, or funding opportunity.',
+                    ),
+                    _numberField(
+                      _appliedController,
+                      'Amount Applied',
+                      info: 'The value requested from the donor or funder.',
+                    ),
+                    _numberField(
+                      _approvedController,
+                      'Amount Approved',
+                      info: 'The amount formally approved so far, if any.',
+                    ),
+                    _numberField(
+                      _receivedController,
+                      'Amount Received',
+                      info:
+                          'The money that has actually been received into the account.',
+                    ),
+                    _dropdownField<String>(
+                      label: 'Legacy Status',
+                      info:
+                          'Where this opportunity currently sits in the legacy fundraising workflow.',
+                      value: _status,
+                      items: const [
+                        DropdownMenuItem(value: 'pipeline', child: Text('Pipeline')),
+                        DropdownMenuItem(value: 'submitted', child: Text('Submitted')),
+                        DropdownMenuItem(value: 'approved', child: Text('Approved')),
+                        DropdownMenuItem(value: 'received', child: Text('Received')),
+                        DropdownMenuItem(value: 'declined', child: Text('Declined')),
+                      ],
+                      onChanged: (value) =>
+                          setState(() => _status = value ?? 'pipeline'),
+                    ),
+                    _numberField(
+                      _probabilityController,
+                      'Probability (%)',
+                      info:
+                          'Your best estimate of how likely the opportunity is to close successfully.',
+                    ),
+                    _requiredField(
+                      _ownerController,
+                      'Owner',
+                      info: 'The person responsible for managing this opportunity.',
+                    ),
+                    _dateField(
+                      _closeDateController,
+                      'Expected Close Date',
+                      info:
+                          'The date you expect a decision or payment milestone to happen.',
+                    ),
+                    _textAreaField(
+                      _notesController,
+                      'Notes',
+                      info:
+                          'Any context, history, or next-step notes for the opportunity.',
+                    ),
+                  ],
+                ),
+              ],
             ),
             _submitButton(
               _submit,

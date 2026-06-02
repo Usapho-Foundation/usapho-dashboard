@@ -14,8 +14,11 @@ import '../services/dashboard_repository.dart';
 import '../services/feedback_service.dart';
 import '../widgets/chart_card.dart';
 import '../widgets/data_entry_dialog.dart';
+import '../widgets/funding_breakdown_table.dart';
+import '../widgets/funding_summary_bar.dart';
 import '../widgets/filter_bar.dart';
 import '../widgets/kpi_card.dart';
+import '../widgets/proposals_status_chart.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -480,6 +483,90 @@ class _DashboardScreenState extends State<DashboardScreen> {
       financials: _filteredFinancials,
     );
 
+    final restrictedSummary = DashboardCalculations.totalRestrictedFunding(_funding);
+    final unrestrictedSummary = DashboardCalculations.totalUnrestrictedFunding(_funding);
+    final proposalStatusCounts = DashboardCalculations.proposalStatusCounts(_funding);
+    final otherIncomeSummary = DashboardCalculations.totalOtherIncome(_funding);
+    final forecastSummary = DashboardCalculations.incomeForecastSummary(_funding);
+
+    double moneyRatio(double received, double target) {
+      if (target == 0) {
+        return received == 0 ? 0 : 100;
+      }
+      return target == 0 ? 0 : (received / target) * 100;
+    }
+
+    MetricHealth moneyHealth(double received, double target) {
+      final ratio = moneyRatio(received, target);
+      if (ratio >= 80) return MetricHealth.good;
+      if (ratio >= 40) return MetricHealth.warning;
+      return MetricHealth.critical;
+    }
+
+    MetricHealth proposalHealth(int successful) {
+      if (successful >= 3) return MetricHealth.good;
+      if (successful >= 1) return MetricHealth.warning;
+      return MetricHealth.critical;
+    }
+
+    MetricHealth forecastHealth(double percentage) {
+      if (percentage >= 50) return MetricHealth.good;
+      if (percentage >= 25) return MetricHealth.warning;
+      return MetricHealth.critical;
+    }
+
+    final restrictedTarget = restrictedSummary['target'] as double;
+    final restrictedReceived = restrictedSummary['received'] as double;
+    final unrestrictedTarget = unrestrictedSummary['target'] as double;
+    final unrestrictedReceived = unrestrictedSummary['received'] as double;
+    final otherTarget = otherIncomeSummary['target'] as double;
+    final otherActual = otherIncomeSummary['actual'] as double;
+    final forecastedTotal = forecastSummary['forecastedTotal'] as double;
+    final actualForecastTotal = forecastSummary['actualTotal'] as double;
+    final percentageAchieved = forecastSummary['percentageAchieved'] as double;
+    final totalProposals = proposalStatusCounts.values.fold<int>(0, (sum, count) => sum + count);
+    final successfulProposals = proposalStatusCounts['successful'] ?? 0;
+    final pendingProposals = proposalStatusCounts['pending'] ?? 0;
+
+    final fundingKpiMetrics = [
+      DashboardMetric(
+        title: 'Restricted Funding',
+        value: 'R${restrictedReceived.toStringAsFixed(0)}',
+        subtitle: 'of R${restrictedTarget.toStringAsFixed(0)} target',
+        health: moneyHealth(restrictedReceived, restrictedTarget),
+        details: const [],
+      ),
+      DashboardMetric(
+        title: 'Unrestricted Funding',
+        value: 'R${unrestrictedReceived.toStringAsFixed(0)}',
+        subtitle: 'of R${unrestrictedTarget.toStringAsFixed(0)} target',
+        health: moneyHealth(unrestrictedReceived, unrestrictedTarget),
+        details: const [],
+      ),
+      DashboardMetric(
+        title: 'Proposals',
+        value: totalProposals.toString(),
+        subtitle: '$successfulProposals successful, $pendingProposals pending',
+        health: proposalHealth(successfulProposals),
+        details: const [],
+      ),
+      DashboardMetric(
+        title: 'Other Income',
+        value: 'R${otherActual.toStringAsFixed(0)}',
+        subtitle: 'of R${otherTarget.toStringAsFixed(0)} target',
+        health: moneyHealth(otherActual, otherTarget),
+        details: const [],
+      ),
+      DashboardMetric(
+        title: 'Income Forecast',
+        value: '${percentageAchieved.toStringAsFixed(0)}%',
+        subtitle:
+            'R${actualForecastTotal.toStringAsFixed(0)} of R${forecastedTotal.toStringAsFixed(0)}',
+        health: forecastHealth(percentageAchieved),
+        details: const [],
+      ),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -519,7 +606,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           : _error != null
           ? Center(child: Text('Something went wrong: $_error'))
           : DefaultTabController(
-              length: 2,
+              length: 3,
               child: Column(
                 children: [
                   const Padding(
@@ -531,6 +618,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         tabs: [
                           Tab(text: 'Overview'),
                           Tab(text: 'Entries'),
+                          Tab(icon: Icon(Icons.assessment_outlined), text: 'Funding Report'),
                         ],
                       ),
                     ),
@@ -740,6 +828,64 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 'Financial record ${item.month?.toIso8601String().split('T').first ?? item.id}',
                             onDelete: () =>
                                 _repository.deleteFinancial(item.id),
+                          ),
+                        ),
+                        SingleChildScrollView(
+                          padding: const EdgeInsets.fromLTRB(
+                            24,
+                            12,
+                            24,
+                            24,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Funding report provides a consolidated view of restricted and unrestricted results, proposal status, income activity, and forecast progress.',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Color(0xFF4B5563),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              FundingSummaryBar(funding: _funding),
+                              const SizedBox(height: 24),
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: fundingKpiMetrics
+                                      .map(
+                                        (metric) => Padding(
+                                          padding: const EdgeInsets.only(
+                                            right: 16,
+                                            bottom: 8,
+                                          ),
+                                          child: SizedBox(
+                                            width: 280,
+                                            child: KpiCard(
+                                              metric: metric,
+                                              onTap: () {},
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              Card(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: ProposalsStatusChart(
+                                    statusCounts: proposalStatusCounts,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              FundingBreakdownTable(funding: _funding),
+                            ],
                           ),
                         ),
                       ],
