@@ -103,7 +103,7 @@ class FundingBreakdownTable extends StatelessWidget {
                     ],
                   )),
                   DataRow(
-                    color: MaterialStateProperty.resolveWith((states) => const Color(0xFFFAFAFA)),
+                    color: WidgetStateProperty.resolveWith((states) => const Color(0xFFFAFAFA)),
                     cells: [
                       const DataCell(Text(
                         'SUBTOTAL',
@@ -194,7 +194,7 @@ class FundingBreakdownTable extends StatelessWidget {
                     ],
                   )),
                   DataRow(
-                    color: MaterialStateProperty.resolveWith((states) => const Color(0xFFFAFAFA)),
+                    color: WidgetStateProperty.resolveWith((states) => const Color(0xFFFAFAFA)),
                     cells: [
                       const DataCell(Text(
                         'SUBTOTAL',
@@ -290,7 +290,7 @@ class FundingBreakdownTable extends StatelessWidget {
                     ],
                   )),
                   DataRow(
-                    color: MaterialStateProperty.resolveWith((states) => const Color(0xFFFAFAFA)),
+                    color: WidgetStateProperty.resolveWith((states) => const Color(0xFFFAFAFA)),
                     cells: [
                       const DataCell(Text(
                         'SUBTOTAL',
@@ -375,7 +375,7 @@ class FundingBreakdownTable extends StatelessWidget {
                     ],
                   )),
                   DataRow(
-                    color: MaterialStateProperty.resolveWith((states) => const Color(0xFFFAFAFA)),
+                    color: WidgetStateProperty.resolveWith((states) => const Color(0xFFFAFAFA)),
                     cells: [
                       const DataCell(Text(
                         'SUBTOTAL',
@@ -468,7 +468,7 @@ class FundingBreakdownTable extends StatelessWidget {
                     );
                   }),
                   DataRow(
-                    color: MaterialStateProperty.resolveWith((states) => const Color(0xFFFAFAFA)),
+                    color: WidgetStateProperty.resolveWith((states) => const Color(0xFFFAFAFA)),
                     cells: [
                       const DataCell(Text(
                         'SUBTOTAL',

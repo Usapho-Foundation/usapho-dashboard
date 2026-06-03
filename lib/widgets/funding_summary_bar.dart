@@ -19,7 +19,6 @@ class FundingSummaryBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final summary = DashboardCalculations.incomeForecastSummary(funding);
     final forecastedTotal = summary['forecastedTotal'] as double? ?? 0.0;
-    final actualTotal = summary['actualTotal'] as double? ?? 0.0;
     final percentageAchieved = summary['percentageAchieved'] as double? ?? 0.0;
     final receivedAllFunding = funding.fold<double>(
       0.0,

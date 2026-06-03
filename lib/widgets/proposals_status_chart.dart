@@ -151,7 +151,6 @@ class _BarChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final barHeight = 16.0;
     final spacing = 12.0;
     final startX = 0.0;
     final endX = size.width;

@@ -847,7 +847,7 @@ class DashboardCalculations {
     List<Map<String, dynamic>> results = [];
 
     for (final category in order) {
-      final items = funding.where((f) => (f.sourceCategory ?? '') == category);
+      final items = funding.where((f) => f.sourceCategory == category);
       final totalRevenue = items.fold<double>(
         0,
         (sum, item) => sum + item.amountReceivedToDate,
