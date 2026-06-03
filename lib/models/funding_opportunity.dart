@@ -34,6 +34,7 @@ class FundingOpportunity {
     required this.comments,
     required this.update,
     required this.forecastedIncome,
+    required this.sourceCategory,
   });
 
   // Legacy fields
@@ -69,6 +70,7 @@ class FundingOpportunity {
   final String comments;
   final String update;
   final double forecastedIncome;
+  final String sourceCategory;
 
   factory FundingOpportunity.fromFirestore(
     Map<String, dynamic> data,
@@ -91,6 +93,7 @@ class FundingOpportunity {
       // New spreadsheet-aligned fields with defaults
       type: data['type'] ?? 'restricted',
       funderName: data['funderName'] ?? '',
+      sourceCategory: data['sourceCategory'] ?? '',
       monthly: (data['monthly'] ?? 0).toDouble(),
       quarterly: (data['quarterly'] ?? 0).toDouble(),
       annually: (data['annually'] ?? 0).toDouble(),
@@ -147,6 +150,7 @@ class FundingOpportunity {
       'comments': comments,
       'update': update,
       'forecastedIncome': forecastedIncome,
+      'sourceCategory': sourceCategory,
     };
   }
 }

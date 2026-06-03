@@ -140,6 +140,7 @@ class _FundingFormState extends State<_FundingForm> {
   late final TextEditingController _forecastedIncomeController;
   late String _status;
   late String _type;
+  late String _sourceCategory;
   static const List<String> _proposalStatuses = [
     'pending',
     'in_progress',
@@ -220,6 +221,7 @@ class _FundingFormState extends State<_FundingForm> {
     );
     _type = existing?.type ?? 'restricted';
     _status = existing?.status ?? (_type == 'proposal' ? 'pending' : 'pipeline');
+    _sourceCategory = existing?.sourceCategory ?? '';
   }
 
   @override
@@ -289,6 +291,7 @@ class _FundingFormState extends State<_FundingForm> {
       comments: _commentsController.text.trim(),
       update: _updateController.text.trim(),
       forecastedIncome: double.tryParse(_forecastedIncomeController.text) ?? 0,
+      sourceCategory: _sourceCategory,
     );
 
     if (widget.existing == null) {
@@ -501,6 +504,19 @@ class _FundingFormState extends State<_FundingForm> {
                   _status = 'pending';
                 }
               }),
+            ),
+            _dropdownField<String>(
+              label: 'Source Category',
+              info: 'The funding source category for this record.',
+              value: _sourceCategory,
+              items: const [
+                DropdownMenuItem(value: '', child: Text('Not specified')),
+                DropdownMenuItem(value: 'corporate', child: Text('Corporate')),
+                DropdownMenuItem(value: 'foundation', child: Text('Donor Foundation')),
+                DropdownMenuItem(value: 'individual', child: Text('Individual Donor')),
+                DropdownMenuItem(value: 'partnership', child: Text('Partnership / Joint Venture / Special Programme')),
+              ],
+              onChanged: (value) => setState(() => _sourceCategory = value ?? ''),
             ),
             ..._buildTypeFields(),
             ExpansionTile(

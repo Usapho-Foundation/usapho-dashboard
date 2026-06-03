@@ -833,6 +833,49 @@ class DashboardCalculations {
     };
   }
 
+  static List<Map<String, dynamic>> revenueBySourceCategory(
+    List<FundingOpportunity> funding,
+  ) {
+    const order = ['corporate', 'foundation', 'individual', 'partnership'];
+    final labels = {
+      'corporate': 'Corporates',
+      'foundation': 'Donor Foundation Funding',
+      'individual': 'Individual Donors',
+      'partnership': 'Partnerships / Joint Ventures / Special Programmes',
+    };
+
+    List<Map<String, dynamic>> results = [];
+
+    for (final category in order) {
+      final items = funding.where((f) => (f.sourceCategory ?? '') == category);
+      final totalRevenue = items.fold<double>(
+        0,
+        (sum, item) => sum + item.amountReceivedToDate,
+      );
+      final unrestricted = items
+          .where((item) => item.type == 'unrestricted')
+          .fold<double>(0, (sum, item) => sum + item.amountReceivedToDate);
+      final restricted = items
+          .where((item) => item.type == 'restricted')
+          .fold<double>(0, (sum, item) => sum + item.amountReceivedToDate);
+
+      final unrestrictedPct = totalRevenue == 0 ? 0.0 : (unrestricted / totalRevenue) * 100;
+      final restrictedPct = totalRevenue == 0 ? 0.0 : (restricted / totalRevenue) * 100;
+
+      results.add({
+        'category': category,
+        'label': labels[category] ?? category,
+        'totalRevenue': totalRevenue,
+        'unrestricted': unrestricted,
+        'restricted': restricted,
+        'unrestrictedPct': unrestrictedPct,
+        'restrictedPct': restrictedPct,
+      });
+    }
+
+    return results;
+  }
+
   static double _engagementScore(String value) {
     switch (value) {
       case 'high':

@@ -19,6 +19,7 @@ import '../widgets/funding_summary_bar.dart';
 import '../widgets/filter_bar.dart';
 import '../widgets/kpi_card.dart';
 import '../widgets/proposals_status_chart.dart';
+import '../widgets/revenue_overview_card.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -488,6 +489,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final proposalStatusCounts = DashboardCalculations.proposalStatusCounts(_funding);
     final otherIncomeSummary = DashboardCalculations.totalOtherIncome(_funding);
     final forecastSummary = DashboardCalculations.incomeForecastSummary(_funding);
+    final revenueBySource = DashboardCalculations.revenueBySourceCategory(_funding);
 
     double moneyRatio(double received, double target) {
       if (target == 0) {
@@ -647,6 +649,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       color: Color(0xFF4B5563),
                                     ),
                                   ),
+                                  const SizedBox(height: 20),
+                                  RevenueOverviewCard(categoryData: revenueBySource),
                                   const SizedBox(height: 20),
                                   FilterBar(
                                     filter: _filter,
