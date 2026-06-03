@@ -43,8 +43,8 @@ class KpiCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  width: 10,
-                  height: 10,
+                  width: 12,
+                  height: 12,
                   decoration: BoxDecoration(
                     color: color,
                     shape: BoxShape.circle,
@@ -52,13 +52,14 @@ class KpiCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 10),
             Text(
               metric.value,
               style: const TextStyle(
-                fontSize: 28,
+                fontSize: 32,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF111827),
+                letterSpacing: 0,
               ),
             ),
             const SizedBox(height: 8),

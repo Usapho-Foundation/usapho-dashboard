@@ -285,7 +285,7 @@ class FundingBreakdownTable extends StatelessWidget {
                       DataCell(Text(_formatCurrency(item.amountAppliedFor))),
                       DataCell(Text(_formatCurrency(item.amountReceivedToDate))),
                       DataCell(Text(item.personResponsible)),
-                      DataCell(FundingStatusBadge(status: item.status)),
+                      DataCell(FundingStatusBadge(status: item.proposalStatus)),
                       DataCell(Text(item.update, maxLines: 2, overflow: TextOverflow.ellipsis)),
                     ],
                   )),

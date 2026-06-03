@@ -7,13 +7,12 @@ ThemeData buildAppTheme() {
     useMaterial3: true,
     fontFamily: 'Noto Sans',
     fontFamilyFallback: const [
-      'Noto Color Emoji',
       'Segoe UI Emoji',
       'Apple Color Emoji',
-      'Segoe UI Symbol',
+      'Noto Color Emoji',
       'Roboto',
     ],
-    textTheme: ThemeData.light().textTheme,
+    textTheme: _zeroLetterSpacing(ThemeData.light().textTheme),
     colorScheme: ColorScheme.fromSeed(
       seedColor: seed,
       brightness: Brightness.light,
@@ -52,5 +51,27 @@ ThemeData buildAppTheme() {
         borderSide: const BorderSide(color: seed, width: 1.4),
       ),
     ),
+  );
+}
+
+TextTheme _zeroLetterSpacing(TextTheme base) {
+  TextStyle z(TextStyle? s) =>
+      (s ?? const TextStyle()).copyWith(letterSpacing: 0);
+  return base.copyWith(
+    displayLarge: z(base.displayLarge),
+    displayMedium: z(base.displayMedium),
+    displaySmall: z(base.displaySmall),
+    headlineLarge: z(base.headlineLarge),
+    headlineMedium: z(base.headlineMedium),
+    headlineSmall: z(base.headlineSmall),
+    titleLarge: z(base.titleLarge),
+    titleMedium: z(base.titleMedium),
+    titleSmall: z(base.titleSmall),
+    bodyLarge: z(base.bodyLarge),
+    bodyMedium: z(base.bodyMedium),
+    bodySmall: z(base.bodySmall),
+    labelLarge: z(base.labelLarge),
+    labelMedium: z(base.labelMedium),
+    labelSmall: z(base.labelSmall),
   );
 }

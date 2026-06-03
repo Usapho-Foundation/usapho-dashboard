@@ -530,6 +530,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final successfulProposals = proposalStatusCounts['successful'] ?? 0;
     final pendingProposals = proposalStatusCounts['pending'] ?? 0;
 
+    final sortedFinancials = [..._filteredFinancials]
+      ..sort((a, b) =>
+          (a.month ?? DateTime(1900)).compareTo(b.month ?? DateTime(1900)));
+    final cashInValues = sortedFinancials.map((f) => f.cashIn).toList();
+    final cashOutValues = sortedFinancials.map((f) => f.cashOut).toList();
+    final cashFlowLabels = sortedFinancials.map((f) => _shortMonth(f.month)).toList();
+
     final fundingKpiMetrics = [
       DashboardMetric(
         title: 'Restricted Funding',
@@ -630,7 +637,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       children: [
                         LayoutBuilder(
                           builder: (context, constraints) {
-                            final wide = constraints.maxWidth > 1120;
+                            final wide = constraints.maxWidth > 860;
 
                             return SingleChildScrollView(
                               padding: const EdgeInsets.fromLTRB(
@@ -714,6 +721,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       ),
                                     ),
                                   ],
+                                  const SizedBox(height: 16),
+                                  ChartCard(
+                                    title: 'Monthly Cash Flow',
+                                    subtitle: 'Cash in vs cash out by month',
+                                    child: CashFlowBarChart(
+                                      cashIn: cashInValues,
+                                      cashOut: cashOutValues,
+                                      labels: cashFlowLabels,
+                                    ),
+                                  ),
                                   const SizedBox(height: 24),
                                   ...overview.sections.map(
                                     (section) => Padding(
@@ -900,6 +917,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
     );
   }
+}
+
+String _shortMonth(DateTime? date) {
+  if (date == null) return '';
+  const names = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+  return names[date.month - 1];
 }
 
 class _AlertsPanel extends StatelessWidget {

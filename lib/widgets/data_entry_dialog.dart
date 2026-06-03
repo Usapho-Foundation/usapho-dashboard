@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/campaign_record.dart';
+import '../models/enums.dart';
 import '../models/financial_record.dart';
 import '../models/funding_opportunity.dart';
 import '../models/partnership.dart';
@@ -139,15 +140,9 @@ class _FundingFormState extends State<_FundingForm> {
   late final TextEditingController _updateController;
   late final TextEditingController _forecastedIncomeController;
   late String _status;
+  late ProposalStatus _proposalStatus;
   late String _type;
   late String _sourceCategory;
-  static const List<String> _proposalStatuses = [
-    'pending',
-    'in_progress',
-    'successful',
-    'no_response',
-    'no_deal',
-  ];
 
   @override
   void initState() {
@@ -221,6 +216,7 @@ class _FundingFormState extends State<_FundingForm> {
     );
     _type = existing?.type ?? 'restricted';
     _status = existing?.status ?? (_type == 'proposal' ? 'pending' : 'pipeline');
+    _proposalStatus = ProposalStatus.fromString(existing?.proposalStatus ?? 'pending');
     _sourceCategory = existing?.sourceCategory ?? '';
   }
 
@@ -274,6 +270,7 @@ class _FundingFormState extends State<_FundingForm> {
       notes: _notesController.text.trim(),
       createdAt: widget.existing?.createdAt ?? DateTime.now(),
       type: _type,
+      proposalStatus: _proposalStatus.value,
       funderName: _funderNameController.text.trim(),
       monthly: double.tryParse(_monthlyController.text) ?? 0,
       quarterly: double.tryParse(_quarterlyController.text) ?? 0,
@@ -411,18 +408,15 @@ class _FundingFormState extends State<_FundingForm> {
             'Person Responsible',
             info: 'The team member responsible for managing this proposal.',
           ),
-          _dropdownField<String>(
-            label: 'Status',
-            info: 'The current proposal status.',
-            value: _status,
-            items: const [
-              DropdownMenuItem(value: 'pending', child: Text('Pending')),
-              DropdownMenuItem(value: 'in_progress', child: Text('In Progress')),
-              DropdownMenuItem(value: 'successful', child: Text('Successful')),
-              DropdownMenuItem(value: 'no_response', child: Text('No Response')),
-              DropdownMenuItem(value: 'no_deal', child: Text('No Deal')),
-            ],
-            onChanged: (value) => setState(() => _status = value ?? 'pending'),
+          _dropdownField<ProposalStatus>(
+            label: 'Proposal Status',
+            info: 'The current proposal lifecycle status.',
+            value: _proposalStatus,
+            items: ProposalStatus.values
+                .map((s) => DropdownMenuItem(value: s, child: Text(s.displayName)))
+                .toList(),
+            onChanged: (value) =>
+                setState(() => _proposalStatus = value ?? ProposalStatus.pending),
           ),
           _textAreaField(
             _updateController,
@@ -498,12 +492,7 @@ class _FundingFormState extends State<_FundingForm> {
                 DropdownMenuItem(value: 'income_activity', child: Text('Other Income Activity')),
                 DropdownMenuItem(value: 'forecast', child: Text('Income Forecast')),
               ],
-              onChanged: (value) => setState(() {
-                _type = value ?? 'restricted';
-                if (_type == 'proposal' && !_proposalStatuses.contains(_status)) {
-                  _status = 'pending';
-                }
-              }),
+              onChanged: (value) => setState(() => _type = value ?? 'restricted'),
             ),
             _dropdownField<String>(
               label: 'Source Category',

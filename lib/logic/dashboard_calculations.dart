@@ -783,7 +783,7 @@ class DashboardCalculations {
     };
 
     for (final proposal in proposals) {
-      final status = proposal.status.toLowerCase();
+      final status = proposal.proposalStatus.toLowerCase();
       if (statusCounts.containsKey(status)) {
         statusCounts[status] = statusCounts[status]! + 1;
       }

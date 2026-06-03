@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Refactored on [DATE]: Consolidated dual-purpose status field into separate
+/// [status] (legacy workflow) and [proposalStatus] (proposal lifecycle) fields.
+/// Added typed enums for all type and status values to eliminate magic strings.
 class FundingOpportunity {
   FundingOpportunity({
     required this.id,
@@ -17,6 +20,7 @@ class FundingOpportunity {
     required this.createdAt,
     // New spreadsheet-aligned fields
     this.type = 'restricted',
+    this.proposalStatus = 'pending',
     this.funderName = '',
     this.monthly = 0.0,
     this.quarterly = 0.0,
@@ -44,6 +48,7 @@ class FundingOpportunity {
   final double amountApplied;
   final double amountApproved;
   final double amountReceived;
+  /// Legacy workflow state: pipeline, submitted, approved, received, declined
   final String status;
   final double probability;
   final DateTime? expectedCloseDate;
@@ -52,7 +57,11 @@ class FundingOpportunity {
   final DateTime? createdAt;
 
   // New spreadsheet-aligned fields
-  final String type; // "restricted" | "unrestricted" | "proposal" | "income_activity" | "forecast"
+  /// Type of funding opportunity using FundingType enum values
+  final String type;
+  /// Proposal lifecycle status (only used when type == 'proposal')
+  /// Values: pending, in_progress, successful, no_response, no_deal
+  final String proposalStatus;
   final String funderName;
   final double monthly;
   final double quarterly;
@@ -70,6 +79,7 @@ class FundingOpportunity {
   final String comments;
   final String update;
   final double forecastedIncome;
+  /// Source category: corporate, foundation, individual, partnership
   final String sourceCategory;
 
   factory FundingOpportunity.fromFirestore(
@@ -92,6 +102,7 @@ class FundingOpportunity {
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
       // New spreadsheet-aligned fields with defaults
       type: data['type'] ?? 'restricted',
+      proposalStatus: data['proposalStatus'] ?? 'pending',
       funderName: data['funderName'] ?? '',
       sourceCategory: data['sourceCategory'] ?? '',
       monthly: (data['monthly'] ?? 0).toDouble(),
@@ -131,6 +142,7 @@ class FundingOpportunity {
       'createdAt': createdAt == null ? null : Timestamp.fromDate(createdAt!),
       // New spreadsheet-aligned fields
       'type': type,
+      'proposalStatus': proposalStatus,
       'funderName': funderName,
       'monthly': monthly,
       'quarterly': quarterly,
